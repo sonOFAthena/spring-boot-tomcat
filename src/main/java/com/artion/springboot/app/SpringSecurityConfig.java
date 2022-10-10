@@ -2,7 +2,6 @@ package com.artion.springboot.app;
 
 import com.artion.springboot.app.auth.handler.LoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -12,6 +11,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @Configuration
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -19,19 +21,32 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private LoginSuccessHandler successHandler;
 
-    @Bean
-    public static BCryptPasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
+    @Autowired
+    private DataSource dataSource;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
 
     @Autowired
     public void configurerGlobal(AuthenticationManagerBuilder builder) throws Exception{
-        PasswordEncoder encoder = passwordEncoder();
+
+        /*
+        //USANDO inMemoryAuthentication()
+        PasswordEncoder encoder = this.passwordEncoder;
         User.UserBuilder users = User.builder().passwordEncoder(encoder::encode);
 
         builder.inMemoryAuthentication()
                 .withUser(users.username("admin").password("asdfg").roles("ADMIN", "USER"))
                 .withUser(users.username("jose").password("asdfg").roles("USER"));
+
+         */
+
+        // USANDO JDBC
+        builder.jdbcAuthentication().dataSource(dataSource)
+                .passwordEncoder(passwordEncoder)
+                .usersByUsernameQuery("SELECT username,password,enabled FROM users WHERE username=?")
+                .authoritiesByUsernameQuery("SELECT u.username, a.authority FROM authorities a INNER JOIN users u on (a.user_id=u.id) WHERE u.username=?");
     }
 
     @Override
