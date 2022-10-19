@@ -8,6 +8,7 @@ import com.artion.springboot.app.models.service.IClienteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +22,7 @@ import javax.validation.Valid;
 import java.awt.color.ProfileDataException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Secured("ROLE_ADMIN")
@@ -34,31 +36,35 @@ public class FacturaController {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    @Autowired
+    private MessageSource messageSource;
+
     @GetMapping("/ver/{id}")
     public String ver(@PathVariable(value = "id") Long id,
                       Model model,
-                      RedirectAttributes flash){
+                      RedirectAttributes flash,
+                      Locale locale){
         //Factura factura = clienteService.findFacturaById(id);
         Factura factura = clienteService.fetchByIdWithClienteWithItemFacturaWithProducto(id);
 
         if (factura == null){
-            flash.addFlashAttribute("error", "La factura no existe en la base de datos!");
+            flash.addFlashAttribute("error", messageSource.getMessage("text.factura.flash.db.error", null, locale));
             return "redirect:/listar";
         }
 
         model.addAttribute("factura", factura);
-        model.addAttribute("titulo", "Factura : ".concat(factura.getDescripcion()));
+        model.addAttribute("titulo", String.format(messageSource.getMessage("text.factura.ver.titulo", null, locale), factura.getDescripcion()));
 
         return "factura/ver";
     }
 
     @GetMapping("/form/{clienteId}")
-    public String crear(@PathVariable(value = "clienteId") Long clienteId, Map<String, Object> model, RedirectAttributes flash){
+    public String crear(@PathVariable(value = "clienteId") Long clienteId, Map<String, Object> model, RedirectAttributes flash, Locale locale){
 
         Cliente cliente = clienteService.findOne(clienteId);
 
         if (cliente == null){
-            flash.addFlashAttribute("error" , "El cliente no existe en la base de datos");
+            flash.addFlashAttribute("error" , messageSource.getMessage("text.cliente.flash.db.error", null, locale));
             return "redirect:/listar";
         }
 
@@ -66,7 +72,7 @@ public class FacturaController {
         factura.setCliente(cliente);
 
         model.put("factura", factura);
-        model.put("titulo", "Crear Factura");
+        model.put("titulo", messageSource.getMessage("text.factura.form.titulo", null, locale));
 
         return "factura/form";
     }
@@ -84,16 +90,17 @@ public class FacturaController {
                           @RequestParam(name = "cantidad[]", required = false) Integer[] cantidad,
                           Model model,
                           RedirectAttributes flash,
-                          SessionStatus status){
+                          SessionStatus status,
+                          Locale locale){
 
         if (result.hasErrors()){
-            model.addAttribute("titulo", "Crear Factura");
+            model.addAttribute("titulo", messageSource.getMessage("text.factura.form.titulo", null, locale));
             return "factura/form";
         }
 
         if (itemId == null || itemId.length == 0){
-            model.addAttribute("titulo", "Crear Factura");
-            model.addAttribute("error", "Error: La factura debe tener facturas asociadas");
+            model.addAttribute("titulo", messageSource.getMessage("text.factura.form.titulo", null, locale));
+            model.addAttribute("error",  messageSource.getMessage("text.factura.flash.lineas.error", null, locale));
             return "factura/form";
         }
 
@@ -115,24 +122,24 @@ public class FacturaController {
         //borra la sesion actual de la factura
         status.setComplete();
 
-        flash.addFlashAttribute("success", "Factura creada con éxito!");
+        flash.addFlashAttribute("success", messageSource.getMessage("text.factura.flash.crear.success", null, locale));
 
         return "redirect:/ver/" + factura.getCliente().getId();
     }
 
     @GetMapping (value = "/eliminar/{id}")
-    public String eliminar(@PathVariable(value = "id") Long id, RedirectAttributes flash){
+    public String eliminar(@PathVariable(value = "id") Long id, RedirectAttributes flash, Locale locale){
 
         Factura factura = clienteService.findFacturaById(id);
 
         if (factura != null){
             clienteService.deleteFactura(id);
-            flash.addFlashAttribute("success", "Factura eliminada con éxito!");
+            flash.addFlashAttribute("success",  messageSource.getMessage("text.factura.flash.eliminar.success", null, locale));
 
             return "redirect:/ver/" + factura.getCliente().getId();
         }
 
-        flash.addFlashAttribute("error", "La factura no existe en la base de datos, no se pudo eliminar!");
+        flash.addFlashAttribute("error",  messageSource.getMessage("text.factura.flash.db.error", null, locale));
         return "redirect:/listar";
     }
 }
