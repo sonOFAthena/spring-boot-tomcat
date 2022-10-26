@@ -4,6 +4,7 @@ import com.artion.springboot.app.models.entity.Cliente;
 import com.artion.springboot.app.models.service.IClienteService;
 import com.artion.springboot.app.models.service.IUploadFileService;
 import com.artion.springboot.app.util.paginator.PageRender;
+import com.artion.springboot.app.view.xml.ClienteList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -85,6 +87,11 @@ public class ClienteController {
         model.put("titulo", messageSource.getMessage("text.cliente.detalle.titulo", null, locale).concat(": ").concat(cliente.getNombre()));
 
         return "ver";
+    }
+
+    @GetMapping (value="/listar-rest")
+    public @ResponseBody ClienteList listarRest(){
+        return new ClienteList(clienteService.findAll());
     }
 
     @RequestMapping(value={"/listar", "/"}, method = RequestMethod.GET)
