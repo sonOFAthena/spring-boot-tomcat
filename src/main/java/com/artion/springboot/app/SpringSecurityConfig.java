@@ -1,13 +1,16 @@
 package com.artion.springboot.app;
 
+import com.artion.springboot.app.auth.filter.JWTAuthenticationFilter;
 import com.artion.springboot.app.auth.handler.LoginSuccessHandler;
 import com.artion.springboot.app.models.service.JpaUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
@@ -56,13 +59,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests().antMatchers("/", "/css/**", "/js/**", "/images/**", "/listar**", "/locale", "/api/clientes/**").permitAll()
+        http.authorizeHttpRequests().antMatchers("/", "/css/**", "/js/**", "/images/**", "/listar**", "/locale").permitAll()
 //                .antMatchers("/ver/**").hasAnyRole("USER")
 //                .antMatchers("/upload/**").hasAnyRole("USER")
 //                .antMatchers("/form/**").hasAnyRole("ADMIN")
 //                .antMatchers("/eliminar/**").hasAnyRole("ADMIN")
 //                .antMatchers("/factura/**").hasAnyRole("ADMIN")
                 .anyRequest().authenticated()
+                /*
                 .and()
                     .formLogin()
                         .successHandler(successHandler)
@@ -71,7 +75,12 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .logout().permitAll()
                 .and()
-                .exceptionHandling().accessDeniedPage("/error_403");
+                .exceptionHandling().accessDeniedPage("/error_403")
+                 */
+                .and()
+                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     }
 }
