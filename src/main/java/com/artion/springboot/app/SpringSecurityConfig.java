@@ -1,7 +1,9 @@
 package com.artion.springboot.app;
 
 import com.artion.springboot.app.auth.filter.JWTAuthenticationFilter;
+import com.artion.springboot.app.auth.filter.JWTAuthorizationFilter;
 import com.artion.springboot.app.auth.handler.LoginSuccessHandler;
+import com.artion.springboot.app.auth.service.JWTService;
 import com.artion.springboot.app.models.service.JpaUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +30,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JWTService jwtService;
 
 
     @Autowired
@@ -78,7 +83,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedPage("/error_403")
                  */
                 .and()
-                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                .addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtService))
+                .addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtService))
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
