@@ -8,13 +8,16 @@
         <version>2.7.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.artion.springboot.jwt</groupId>
-    <artifactId>spring-boot-jwt</artifactId>
+    <groupId>com.artion.springboot.tomcat</groupId>
+    <artifactId>spring-boot-tomcat</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-jwt</name>
-    <description>spring-boot-data-jpa</description>
+    <name>spring-boot-tomcat</name>
+    <description>spring-boot-jwt</description>
+    <packaging>war</packaging>
     <properties>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -39,6 +42,12 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <version>2.7.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
             <version>2.5.7</version>
         </dependency>
@@ -47,12 +56,6 @@
             <artifactId>thymeleaf-extras-springsecurity5</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

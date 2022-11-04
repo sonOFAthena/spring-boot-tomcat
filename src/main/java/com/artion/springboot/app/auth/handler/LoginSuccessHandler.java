@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,10 +18,10 @@ import java.util.Locale;
 public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Autowired
-    private MessageSource messageSource;
+    private LocaleResolver localeResolver;
 
     @Autowired
-    private LocaleResolver localeResolver;
+    private MessageSource messageSource;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -31,7 +29,9 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         SessionFlashMapManager flashMapManager = new SessionFlashMapManager();
         FlashMap flashMap = new FlashMap();
 
+
         Locale locale = localeResolver.resolveLocale(request);
+
         String mensaje = String.format(messageSource.getMessage("text.login.success", null, locale), authentication.getName());
 
         flashMap.put("success", mensaje);
